@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { REFERENCE_LAYOUT_HOME_BANNER_SLIDES } from "../lib/home-banners";
 import { createUniqueMarketplaceCategorySlug } from "../lib/marketplace-category-slug";
 import { backfillProductSlugsFromNames } from "../lib/product-slug";
