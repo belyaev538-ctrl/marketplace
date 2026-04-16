@@ -1,0 +1,97 @@
+/* M-Lavka home: backgrounds and effects not covered by Tailwind utilities */
+
+.ml-home {
+  background-image: url(/mlavka/img/home-bg.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.ml-home-card {
+  background: linear-gradient(
+    305.99deg,
+    rgba(13, 65, 126, 0.7) 7.07%,
+    rgba(5, 39, 79, 0.7) 89.26%
+  );
+}
+
+.ml-home .ml-home-tab-active {
+  background: #fff;
+  color: #0075ff;
+}
+
+.ml-home .ml-home-tab-active svg path {
+  fill: #0075ff;
+}
+
+.ml-home .ml-boxs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes ml-home-map-line-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ml-home-map-line-animate {
+  animation: ml-home-map-line-appear 0.7s ease-out 0.15s both;
+}
+
+/* Home promo banner (Swiper), aligned with reference-layout */
+.home-banner-swiper .swiper {
+  overflow: visible;
+}
+
+.home-banner-swiper .swiper-pagination {
+  position: relative;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 15px;
+}
+
+@media (min-width: 768px) {
+  .home-banner-swiper .swiper-pagination {
+    padding: 10px 20px;
+  }
+}
+
+.home-banner-swiper .swiper-pagination-bullet {
+  width: 4px;
+  height: 4px;
+  background: #b7c5d5;
+  opacity: 1;
+}
+
+.home-banner-swiper .swiper-pagination-bullet-active {
+  background: #0075ff;
+}
+
+.home-banner-swiper .home-banner-nav-prev,
+.home-banner-swiper .home-banner-nav-next {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.home-banner-swiper:hover .home-banner-nav-prev,
+.home-banner-swiper:hover .home-banner-nav-next {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.home-banner-swiper .home-banner-nav-prev:hover svg circle,
+.home-banner-swiper .home-banner-nav-next:hover svg circle {
+  fill: #f3f8ff;
+}
+
+.home-banner-swiper .home-banner-nav-prev:hover svg rect,
+.home-banner-swiper .home-banner-nav-next:hover svg rect {
+  fill: #0075ff;
+}

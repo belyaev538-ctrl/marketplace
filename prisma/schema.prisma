@@ -1,0 +1,251 @@
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SHOP_OWNER
+}
+
+enum ImportJobStatus {
+  pending
+  processing
+  success
+  failed
+}
+
+/// Статус последней выгрузки на витрине магазина (поле Store.lastImportStatus).
+enum ImportStatus {
+  pending
+  processing
+  success
+  failed
+}
+
+enum StoreType {
+  xml
+  cabinet
+  mixed
+}
+
+enum StoreFulfillmentMode {
+  delivery
+  pickup
+  both
+  offline
+}
+
+enum StoreBusinessType {
+  grocery
+  construction
+  pet
+  pharmacy
+  electronics
+  clothing
+  home
+  kids
+  beauty
+  auto
+  restaurants_cafes
+  services
+  other
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  storeId String? @unique
+  store   Store?  @relation(fields: [storeId], references: [id])
+}
+
+model Store {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  logo String?
+
+  shortDescription String?
+  fullDescription  String?
+  /// Как работает магазин (доставка, самовывоз, особенности) — отдельно от витринного описания.
+  workDescription String?
+  /// Совместимость со старыми данными / дашбордом продавца
+  description String?
+
+  xmlUrl      String?
+  fallbackUrl String?
+  website     String?
+
+  vkUrl             String?
+  telegramUrl       String?
+  whatsappUrl       String?
+  otherMessengerUrl String?
+
+  /// Категория магазина как бизнеса (продукты, стройка, …), не категория товаров.
+  storeCategory String?
+
+  storeType StoreType @default(xml)
+
+  active       Boolean @default(true)
+  showProducts Boolean @default(true)
+
+  fulfillmentModes StoreFulfillmentMode[] @default([delivery])
+
+  businessTypes StoreBusinessType[] @default([])
+
+  phone   String?
+  address String?
+
+  latitude  Float?
+  longitude Float?
+
+  workingHours Json?
+
+  lastImportAt     DateTime?
+  lastImportStatus ImportStatus?
+  lastImportError  String?
+
+  autoImport Boolean @default(true)
+  /// Час суток (0–23) по UTC, в начале которого раз в сутки ставится задача автоимпорта (cron вызывается каждый час).
+  autoImportHourUtc Int @default(3)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner User?
+
+  products         Product[]
+  sourceCategories SourceCategory[]
+  mappings         CategoryMapping[]
+  importLogs       ImportLog[]
+  importJobs       ImportJob[]
+}
+
+model ImportJob {
+  id          String          @id @default(cuid())
+  storeId     String
+  store       Store           @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  status      ImportJobStatus @default(pending)
+  priority    Int             @default(0)
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  error       String?
+  createdAt   DateTime        @default(now())
+}
+
+model ImportLog {
+  id        String   @id @default(cuid())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  status    String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model SourceCategory {
+  id         String    @id @default(cuid())
+  externalId String
+  name       String
+  parentId   String?
+  storeId    String
+  store      Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  products   Product[]
+  mappings   CategoryMapping[]
+
+  @@unique([storeId, externalId])
+}
+
+model MarketplaceCategory {
+  id       String                @id @default(cuid())
+  name     String
+  slug     String                @unique
+  parentId String?
+  parent   MarketplaceCategory?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children MarketplaceCategory[] @relation("CategoryTree")
+  mappings CategoryMapping[]
+}
+
+model CategoryMapping {
+  id                    String @id @default(cuid())
+  storeId               String
+  sourceCategoryId      String
+  marketplaceCategoryId String
+
+  store               Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  sourceCategory      SourceCategory      @relation(fields: [sourceCategoryId], references: [id], onDelete: Cascade)
+  marketplaceCategory MarketplaceCategory @relation(fields: [marketplaceCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, sourceCategoryId, marketplaceCategoryId])
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  externalId  String
+  name        String
+  description String?
+  price       Float
+  oldPrice    Float?
+  externalUrl String?
+  active      Boolean @default(true)
+  availability Boolean @default(true)
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  sourceCategoryId String?
+  sourceCategory   SourceCategory? @relation(fields: [sourceCategoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Полнотекстовый поиск: tsvector (name + description), обновляется в БД при импорте
+  searchVector Unsupported("tsvector")?
+
+  images ProductImage[]
+
+  @@unique([storeId, externalId])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+}
+
+/// Баннеры главной страницы (слайдер под категориями).
+model HomeBanner {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String?
+  imageUrl  String
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  linkUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Глобальные настройки сайта (одна строка, id = "default").
+model SiteSettings {
+  id String @id @default("default")
+
+  footerTelegramUrl  String?
+  footerVkUrl        String?
+  footerWhatsappUrl  String?
+  footerMaxUrl       String?
+
+  updatedAt DateTime @updatedAt
+}

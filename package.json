@@ -1,26 +1,53 @@
 {
-  "name": "marketplace-temp",
+  "name": "marketplace-mvp",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
+    "dev:clean": "killall node || true && rm -rf .next && next dev -p 3000",
+    "dev:full": "killall node || true && rm -rf .next node_modules/.prisma && npx prisma generate && next dev -p 3000",
+    "dev:poll": "WATCHPACK_POLLING=true next dev -p 3000",
+    "fix": "killall node || true && rm -rf .next node_modules/.prisma && npx prisma generate && next dev -p 3000",
+    "dev:help": "echo \"dev:clean — использовать если верстка поехала\" && echo \"dev:full / fix — после изменений Prisma или битого кеша\" && echo \"dev:poll — использовать если ошибки EMFILE\"",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "db:seed:banners": "npx tsx scripts/seed-home-banners-from-layout.ts",
+    "reference": "python3 -m http.server 4173 --directory reference-layout",
+    "seo:backfill": "npx tsx scripts/backfill-seo-slugs.ts"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.1",
+    "fast-xml-parser": "^5.5.11",
+    "next": "14.2.35",
+    "next-auth": "^4.24.13",
+    "prisma": "^6.19.3",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.35"
+    "sharp": "^0.34.5",
+    "swiper": "^12.1.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.35"
+    "tsx": "^4.21.0",
+    "typescript": "^5"
   }
 }

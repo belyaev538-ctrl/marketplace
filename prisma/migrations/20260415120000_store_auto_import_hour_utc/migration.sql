@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Store" ADD COLUMN "autoImportHourUtc" INTEGER NOT NULL DEFAULT 3;

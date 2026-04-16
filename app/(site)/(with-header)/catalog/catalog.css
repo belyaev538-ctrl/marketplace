@@ -1,0 +1,45 @@
+/* Каталог: hover карточек категорий как в M-Lavka */
+.catalog-category-card {
+  cursor: pointer;
+  transition: 0.3s ease all;
+}
+
+.catalog-category-card:hover {
+  box-shadow: 0px 10px 33px 0px #08428754;
+}
+
+/* Тени карточки товара — в `catalog-product-grid.tsx` (Tailwind), чтобы сетка совпадала на всех страницах. */
+
+/* Чекбоксы в сайдбаре атрибутов — как .custom-checkbox в макете */
+.catalog-sidebar-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #3e6897;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+.catalog-sidebar-checkbox:checked {
+  border-color: #0075ff;
+  background: #0075ff;
+}
+.catalog-sidebar-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 101%;
+  height: 101%;
+  background-image: url(/mlavka/img/checkbox-icon.svg);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+.catalog-sidebar-checkbox:focus-visible {
+  outline: 2px solid #0075ff;
+  outline-offset: 2px;
+}
